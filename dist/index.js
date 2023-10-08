@@ -8,7 +8,7 @@ const discord_js_1 = require("discord.js");
 const cheerio_1 = __importDefault(require("cheerio"));
 const node_cron_1 = __importDefault(require("node-cron"));
 const pdf_parse_1 = __importDefault(require("pdf-parse"));
-const config_json_1 = require("../src/config.json");
+const config_json_1 = require("./config.json");
 const webhookClient = new discord_js_1.WebhookClient({ url: config_json_1.webhook_url });
 // Function to scrape a website
 async function scrapeWebsite() {
