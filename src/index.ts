@@ -3,10 +3,13 @@ import { WebhookClient } from 'discord.js';
 import cheerio from 'cheerio';
 import cron from 'node-cron';
 import pdf from 'pdf-parse';
-import { webhook_url } from '../src/config.json';
+import fs from 'fs';
+import path from 'path';
+
+let webhook_url: string;
 
 
-const webhookClient = new WebhookClient({ url: webhook_url });
+
 // Function to scrape a website
 async function scrapeWebsite() {
   try {
@@ -45,6 +48,16 @@ async function ReadFile(url: string) {
 }
 
 async function Process() {
+  try {
+    const config = fs.readFileSync(path.join(__dirname,'../src/config.json'), 'utf8');
+    webhook_url = JSON.parse(config).webhook_url;
+  
+  } catch (error) {
+    return console.log('Error: Failed to read config file @ ../src/config.json');
+  }
+
+  const webhookClient = new WebhookClient({ url: webhook_url });
+
   const Episodes: Array<string> | null = await scrapeWebsite();
   if (Episodes === null) return console.log('Error: Failed to scrape website');
 
