@@ -17,8 +17,10 @@ async function scrapeWebsite() {
         const $ = cheerio_1.default.load(response.data);
         let Episodes = [];
         const targetDiv = $('div.row.row-cols-md-3.row-cols-lg-5.justify-content-center');
+        console.log("tg" + targetDiv);
         targetDiv.children().each((index, element) => {
             Episodes.push(String($(element).children().attr('href')));
+            console.log("elm", String($(element).children().attr('href')));
         });
         return Episodes;
     }
@@ -46,6 +48,7 @@ async function ReadFile(url) {
 }
 async function Process() {
     const Episodes = await scrapeWebsite();
+    console.log(Episodes);
     if (Episodes === null)
         return console.log('Error: Failed to scrape website');
     const Preview = await ReadFile(`https://www.hamik.cz${Episodes[0]}`);
