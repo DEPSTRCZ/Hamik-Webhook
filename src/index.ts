@@ -10,11 +10,12 @@ const webhookClient = new WebhookClient({ url: webhook_url });
 // Function to scrape a website
 async function scrapeWebsite() {
   try {
-    const response = await axios.get('https://www.hamik.cz/archive/');
+    const response = await axios.get('https://www.hamik.cz/archive/', {
+      timeout: 10000,
+    });
     const $ = cheerio.load(response.data);
     let Episodes: Array<string> = [];
     const targetDiv = $('div.row.row-cols-md-3.row-cols-lg-5.justify-content-center');
-    console.log("tg" + targetDiv)
 
     targetDiv.children().each((index, element) => {
       Episodes.push(String($(element).children().attr('href')))
@@ -23,6 +24,7 @@ async function scrapeWebsite() {
     return Episodes;
     
   } catch (error) {
+    console.log(error)
     return null;
   }
 }
@@ -33,7 +35,6 @@ async function ReadFile(url: string) {
     const data = await pdf(response.data);
     const marker = "_____________________________________________________________________________________________________________________________________________________________________________";
     const MarkerIndex = data.text.indexOf(marker)+624;
-
 
     if (MarkerIndex !== -1) {
       const textAfterMarker = data.text.substring(MarkerIndex + marker.length);
@@ -48,7 +49,6 @@ async function ReadFile(url: string) {
 
 async function Process() {
   const Episodes: Array<string> | null = await scrapeWebsite();
-  console.log(Episodes)
   if (Episodes === null) return console.log('Error: Failed to scrape website');
 
   const Preview = await ReadFile(`https://www.hamik.cz${Episodes[0]}`);
@@ -75,8 +75,13 @@ async function Run() {
   console.log('Running');
   await Process();
   cron.schedule('0 10 * * 6', async () => {
-    console.log('Running CRON');
-    await Process();
+    console.log("Scheduling CRON");
+    const randomDelay = Math.floor(Math.random() * 240);
+
+    setTimeout(async () => {
+      console.log('Running CRON');
+      await Process();
+    }, randomDelay * 60000);
   });
 }
 Run();

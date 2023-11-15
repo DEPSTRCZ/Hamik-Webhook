@@ -13,11 +13,12 @@ const webhookClient = new discord_js_1.WebhookClient({ url: config_json_1.webhoo
 // Function to scrape a website
 async function scrapeWebsite() {
     try {
-        const response = await axios_1.default.get('https://www.hamik.cz/archive/');
+        const response = await axios_1.default.get('https://www.hamik.cz/archive/', {
+            timeout: 10000,
+        });
         const $ = cheerio_1.default.load(response.data);
         let Episodes = [];
         const targetDiv = $('div.row.row-cols-md-3.row-cols-lg-5.justify-content-center');
-        console.log("tg" + targetDiv);
         targetDiv.children().each((index, element) => {
             Episodes.push(String($(element).children().attr('href')));
             console.log("elm", String($(element).children().attr('href')));
@@ -25,6 +26,7 @@ async function scrapeWebsite() {
         return Episodes;
     }
     catch (error) {
+        console.log(error);
         return null;
     }
 }
@@ -48,7 +50,6 @@ async function ReadFile(url) {
 }
 async function Process() {
     const Episodes = await scrapeWebsite();
-    console.log(Episodes);
     if (Episodes === null)
         return console.log('Error: Failed to scrape website');
     const Preview = await ReadFile(`https://www.hamik.cz${Episodes[0]}`);
@@ -74,8 +75,12 @@ async function Run() {
     console.log('Running');
     await Process();
     node_cron_1.default.schedule('0 10 * * 6', async () => {
-        console.log('Running CRON');
-        await Process();
+        console.log("Scheduling CRON");
+        const randomDelay = Math.floor(Math.random() * 240);
+        setTimeout(async () => {
+            console.log('Running CRON');
+            await Process();
+        }, randomDelay * 60000);
     });
 }
 Run();
